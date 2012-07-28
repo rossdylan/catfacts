@@ -21,5 +21,6 @@ setup(
         entry_points="""
         [console_scripts]
         catfacts = catfacts:main
-        """
+        """,
+        zip_safe=False,
         )
