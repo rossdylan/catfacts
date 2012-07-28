@@ -20,7 +20,7 @@ class CatFactsREST(object):
         dburi = self.config['dburi']
         self.db = Shove(dburi)
         self.app = Flask(__name__)
-        self.twilio = TwilioRestClient(
+        self.api = TwilioRestClient(
                 self.config['SID'],
                 self.config['token'])
         if 'numbers' not in self.db:
@@ -39,10 +39,9 @@ class CatFactsREST(object):
                 "/": (self.view_home, {"methods": ['GET']}),
                 }
         map(
-                lambda route: self.app.route(
-                    route,
-                    **self.routes[route][1])(self.routes[route][0]),
-                self.routes)
+            lambda route: self.app.route(route,
+                **self.routes[route][1])(self.routes[route][0]),
+            self.routes)
 
     def view_home(self):
         """
@@ -54,9 +53,11 @@ class CatFactsREST(object):
         """
         POST: /api/numbers
         """
+        print "Adding numbers"
         try:
-            data = json.loads(request.data)
-        except:
+            j = request.values['json']
+            data = json.loads(j)
+        except Exception as e:
             return json.dumps(dict(
                 success=False,
                 message="Invalid data recieved"))
@@ -72,8 +73,9 @@ class CatFactsREST(object):
             if number not in self.db['numbers']:
                 self.db['numbers'].append(number)
                 self.db.sync()
-                self.twilio.sms.messages.create(
+                self.api.sms.messages.create(
                 to=number,
+                from_="2037947419",
                 body="Congrats, you have been signed up for catfacts, \
                         the Premire cat information service, you will \
                         receive hourly cat information")
@@ -119,7 +121,7 @@ class CatFactsREST(object):
         POST: /api/facts
         """
         try:
-            data = json.loads(request.body)
+            data = json.loads(request.values['json'])
         except:
             return json.dumps(dict(
                 success=False,
