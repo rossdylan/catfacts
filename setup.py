@@ -1,3 +1,4 @@
+import os
 from setuptools import setup
 
 requires = [
@@ -9,7 +10,11 @@ requires = [
         'sqlalchemy',
         'tw2.core',
         'tw2.forms',
+        'BeautifulSoup4',
         ]
+
+if os.environ.get('OPENSHIFT_REPO_DIR'):
+    requires.append('mysql-python')
 
 setup(
         name="catfacts",
