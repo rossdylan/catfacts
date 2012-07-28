@@ -153,7 +153,7 @@ def load_facts(config):
 
 def main():
     from sys import argv
-    config = yaml.load(file("/etc/catfacts.yml").read())
+    config = yaml.load(file(argv[2]).read())
     if argv[1] == "rest":
         cf = CatFactsREST(config)
         cf.start()
