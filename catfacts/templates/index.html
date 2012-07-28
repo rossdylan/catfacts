@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8">
+		<title>CatFacts</title>
+	</head>
+	<body>
+		<h1>CatFacts</h1>
+        <p>Welcome to CatFacts, your premiere cat fact service.</p>
+
+        <h2>Subscribe</h2>
+        <p>Enter a phone number in the form below to subscribe to
+            hourly cat facts, courtesy of CatFacts.</p>
+        <form id="fact-form" action="/subscribe" method="POST">
+            # <input type="text" name="number" value="867-5309" />
+            <input type="submit" value="Subscribe" />
+        </form>
+
+        <h2>Submit a CatFact</h2>
+        <p>Use the below form to submit a CatFact to our impressive
+            database! Keep it short but impressive (as cats often are).</p>
+        <form id="submit-from" action="/submit" method="POST">
+            <textarea name="fact" rows="4" cols="40"></textarea>
+            <input type="submit" value="Submit" />
+        </form>
+	</body>
+</html>
