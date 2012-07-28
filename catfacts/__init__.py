@@ -27,7 +27,7 @@ class CatFactsREST(object):
 
         self.routes = {
                 "/api/numbers/<num>": (self.remove_number, {"methods": ['DELETE',]}),
-                "/numbers": (self.add_number, {"methods": ['POST',]}),
+                "/api/numbers": (self.add_number, {"methods": ['POST',]}),
                 "/api/callback": (self.twilio_callback, {"methods": ['GET',]}),
                 "/api/facts": (self.add_facts, {"methods": ['POST',]})}
         map(
