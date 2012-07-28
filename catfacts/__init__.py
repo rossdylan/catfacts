@@ -1,7 +1,6 @@
 import yaml
 import json
 import twilio.twiml
-import re
 from twilio.rest import TwilioRestClient
 from shove import Shove
 from flask import Flask, request, abort
@@ -30,7 +29,8 @@ class CatFactsREST(object):
                 "/api/numbers": (self.add_number, {"methods": ['POST']}),
                 "/api/numbers/<num>": (self.remove_number, {"methods":
                     ['DELETE']}),
-                "/api/callback": (self.twilio_callback, {"methods": ['GET']})}
+                "/api/callback": (self.twilio_callback, {"methods": ['GET']}),
+                "/api/facts": (self.add_facts, {"methods": ['POST']})}
         map(
                 lambda route: self.app.route(
                     route,
@@ -135,11 +135,18 @@ class CatFactsREST(object):
 
 def load_facts(config):
     import requests
+    import re
+    db = Shove(config['dburi'])
+    db['facts'] = []
     url1 = 'http://www.cats.alpha.pl/facts.htm',
     raw = requests.get(url1).text
-    cleaned = filter(
+    filtered = filter(
             lambda l: l.startswith('<li>'),
-            map(lambda l: re.sub('<[^<]+?>', '', (l.strip()), raw.split('\n')))
+            map(lambda l: l.strip(), raw.split('\n')))
+    stripped = map(lambda l: re.sub('<[^<]+?>', '', l), filtered)
+    db['facts'].extend(stripped)
+    db.sync*()
+
 
 def main():
     from sys import argv
@@ -148,7 +155,7 @@ def main():
         cf = CatFactsREST(config)
         cf.start()
     elif argv[1] == "load":
-        pass
+        load_facts(config)
     elif argv[1] == "cron":
         pass
 
