@@ -91,15 +91,43 @@ class CatFactsREST(object):
         response.sms(choice(self.db['facts']))
         return str(response)
 
+    def add_facts(self):
+        """
+        POST: /api/facts
+        """
+        try:
+            data = json.loads(request.body)
+        except:
+            return json.dumps(dict(
+                success=False,
+                message="Invalid data recieved"))
+        try:
+            self.db['facts'].extend(data['facts'])
+            self.db.sync()
+            return json.dumps(dict(
+                success=True,
+                message='Added more cat facts'))
+        except KeyError:
+            return json.dumps(dict(
+                success=False,
+                message="not enough parameters"))
+
     def start(self):
         self.app.run(
                 host=self.config['host'],
                 port=self.config['port'])
 
+def load_facts(config):
+    import requests
+    url1 = 'http://www.cats.alpha.pl/facts.htm',
+    raw = requests.get(url1).text
+    cleaned = filter(
+            lambda l: l.startswith('<li>'),
+            map(lambda l: l.strip(), raw.split('\n')))
 
 def main():
     from sys import argv
-    config = yaml.load(file("/etc/catfacts.yaml").read())
+    config = yaml.load(file("/etc/catfacts.yml").read())
     if argv[1] == "rest":
         cf = CatFactsREST(config)
         cf.start()

@@ -3,7 +3,9 @@ from setuptools import setup
 requires = [
         "twilio",
         "pyyaml",
-        "shove"]
+        "shove",
+        "flask",
+        'requests',]
 
 setup(
         name="catfacts",
@@ -11,4 +13,8 @@ setup(
         author="Ross Delinger",
         author_email="rdelinger@helixoide.com",
         install_requires=requires,
+        entry_points="""
+        [console_scripts]
+        catfacts = catfacts:main
+        """
         )
