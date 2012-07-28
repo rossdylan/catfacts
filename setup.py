@@ -1,14 +1,15 @@
 from setuptools import setup
 
 requires = [
-        "twilio",
-        "pyyaml",
-        "shove",
-        "flask",
+        'twilio',
+        'pyyaml',
+        'shove',
+        'flask',
         'requests',
         'sqlalchemy',
         'tw2.core',
         'tw2.forms',
+        'pysqlite',
         ]
 
 setup(
