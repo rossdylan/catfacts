@@ -1,7 +1,8 @@
 import yaml
 import json
-from twilio.rest import TwilioRestClient
 import twilio.twiml
+import re
+from twilio.rest import TwilioRestClient
 from shove import Shove
 from flask import Flask, request, abort
 from random import choice
@@ -11,6 +12,7 @@ class CatFactsREST(object):
 
     def __init__(self, config):
         self.config = config
+        self.apikeys = [s.strip() for s in self.config['apikeys'].split(',')]
         dburi = self.config['dburi']
         self.db = Shove(dburi)
         self.app = Flask(__name__)
@@ -23,7 +25,6 @@ class CatFactsREST(object):
             print "No catfacts found, run catfacts load"
             exit()
         self.db.sync()
-
 
         self.routes = {
                 "/api/numbers": (self.add_number, {"methods": ['POST']}),
@@ -47,6 +48,13 @@ class CatFactsREST(object):
             return json.dumps(dict(
                 success=False,
                 message="Invalid data recieved"))
+        try:
+            if data['apikey'] not in self.apikeys:
+                raise Exception
+        except:
+            return json.dumps(dict(
+                succes=False,
+                message="Unauthorized"))
         try:
             number = data['number']
             if number not in self.db['numbers']:
@@ -102,6 +110,14 @@ class CatFactsREST(object):
                 success=False,
                 message="Invalid data recieved"))
         try:
+            if data['apikey'] not in self.apikeys:
+                raise Exception
+        except:
+            return json.dumps(dict(
+                succes=False,
+                message="Unauthorized"))
+
+        try:
             self.db['facts'].extend(data['facts'])
             self.db.sync()
             return json.dumps(dict(
@@ -123,7 +139,7 @@ def load_facts(config):
     raw = requests.get(url1).text
     cleaned = filter(
             lambda l: l.startswith('<li>'),
-            map(lambda l: l.strip(), raw.split('\n')))
+            map(lambda l: re.sub('<[^<]+?>', '', (l.strip()), raw.split('\n')))
 
 def main():
     from sys import argv
