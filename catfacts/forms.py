@@ -11,6 +11,7 @@ class SubscribeForm(tw2.forms.FormPage):
         id = tw2.forms.HiddenField()
         number = tw2.forms.TextField('number', label='#')
 
+
 class FactForm(tw2.forms.FormPage):
     title = 'Submit a CatFact'
 

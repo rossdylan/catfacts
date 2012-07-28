@@ -37,7 +37,6 @@ class CatFactsREST(object):
                     **self.routes[route][1])(self.routes[route][0]),
                 self.routes)
 
-
     def add_number(self):
         """
         POST: /api/numbers
@@ -62,14 +61,17 @@ class CatFactsREST(object):
                 self.db.sync()
                 self.twilio.sms.messages.create(
                 to=number,
-                body="Congrats, you have been signe dup for catfacts, the Premire cat information service, you will receive hourly cat information")
+                body="Congrats, you have been signed up for catfacts, \
+                        the Premire cat information service, you will \
+                        receive hourly cat information")
                 return json.dumps(dict(
                     success=True,
                     message="Added {0} to catfacts".format(number)))
             else:
                 return json.dumps(dict(
                     success=False,
-                    message="{0} is already signe dup for catfacts".format(number)))
+                    message="{0} is already signed up for catfacts".format(
+                            number)))
 
         except KeyError:
             return json.dumps(dict(
@@ -133,6 +135,7 @@ class CatFactsREST(object):
                 host=self.config['host'],
                 port=self.config['port'])
 
+
 def load_facts(config):
     import requests
     import re
@@ -158,4 +161,3 @@ def main():
         load_facts(config)
     elif argv[1] == "cron":
         pass
-
