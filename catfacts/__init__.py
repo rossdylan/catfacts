@@ -117,7 +117,7 @@ class CatFactsREST(object):
                 raise Exception
         except:
             return json.dumps(dict(
-                succes=False,
+                success=False,
                 message="Unauthorized"))
 
         try:
