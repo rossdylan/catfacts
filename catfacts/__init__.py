@@ -1,9 +1,16 @@
+import urllib
+import urllib2
 import yaml
 import json
 import twilio.twiml
 from twilio.rest import TwilioRestClient
 from shove import Shove
-from flask import Flask, request, abort
+from flask import (
+        Flask,
+        request,
+        abort,
+        render_template,
+        )
 from random import choice
 
 
@@ -26,14 +33,53 @@ class CatFactsREST(object):
         self.db.sync()
 
         self.routes = {
-                "/api/numbers/<num>": (self.remove_number, {"methods": ['DELETE',]}),
-                "/api/numbers": (self.add_number, {"methods": ['POST',]}),
-                "/api/callback": (self.twilio_callback, {"methods": ['GET',]}),
-                "/api/facts": (self.add_facts, {"methods": ['POST',]})}
+                "/api/numbers": (self.add_number, {"methods": ['POST']}),
+                "/api/numbers/<num>": (self.remove_number, {"methods":
+                    ['DELETE']}),
+                "/api/callback": (self.twilio_callback, {"methods": ['GET']}),
+                "/api/facts": (self.add_facts, {"methods": ['POST']}),
+                "/": (self.view_home, {"methods": ['GET']}),
+                "/subscribe": (self.subscribe, {"methods": ['POST']}),
+                "/submit": (self.submit, {"methods": ['POST']}),
+                }
         map(
             lambda route: self.app.route(route,
                 **self.routes[route][1])(self.routes[route][0]),
             self.routes)
+
+    def view_home(self):
+        """
+        View the CatFacts homepage, where you can submit CatFacts!
+        """
+        return render_template('index.html')
+
+    def subscribe(self):
+        """
+        Add a phone number to the CatFacts database.
+        """
+        number = request.values['number']
+        data = json.dumps(dict(
+            number=number,
+            apikey='submitkey',
+        ))
+        payload = dict(json=data)
+        urllib2.urlopen('http://localhost:{0}/api/numbers'.format(
+            self.config['port'], data=urllib.urlencode(payload)))
+        self.app.redirect('/')  # TODO: Add success message
+
+    def submit(self):
+        """
+        Submit a cat fact to the CatFacts database.
+        """
+        fact = request.values['fact']
+        data = json.dumps(dict(
+            fact=fact,
+            apikey='submitkey',
+        ))
+        payload = dict(json=data)
+        urllib2.urlopen('http://localhost:{0}/api/facts'.format(
+            self.config['port'], data=urllib.urlencode(payload)))
+        self.app.redirect('/')  # TODO: Add success message
 
     def add_number(self):
         """
@@ -133,14 +179,14 @@ class CatFactsREST(object):
 
     def start(self):
         self.app.run(
-                debug=True,
                 host=self.config['host'],
-                port=self.config['port'])
+                port=self.config['port'],
+                debug=True)
 
 
 def load_facts(config):
-    import requests
     import re
+    import requests
     db = Shove(config['dburi'])
     db['facts'] = []
     url1 = 'http://www.cats.alpha.pl/facts.htm'
@@ -155,7 +201,7 @@ def load_facts(config):
 
 def main():
     from sys import argv
-    config = yaml.load(file("/etc/catfacts.yml").read())
+    config = yaml.load(file(argv[2]).read())
     if argv[1] == "rest":
         cf = CatFactsREST(config)
         cf.start()

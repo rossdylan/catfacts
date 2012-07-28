@@ -1,14 +1,14 @@
 from setuptools import setup
 
 requires = [
-        "twilio",
-        "pyyaml",
-        "shove",
-        "flask",
+        'twilio',
+        'pyyaml',
+        'shove',
+        'flask',
         'requests',
         'sqlalchemy',
-        'tw2.core',
-        'tw2.forms',
+        'pysqlite',
+        'jinja2',
         ]
 
 setup(
@@ -21,5 +21,6 @@ setup(
         entry_points="""
         [console_scripts]
         catfacts = catfacts:main
-        """
+        """,
+        zip_safe=False,
         )
