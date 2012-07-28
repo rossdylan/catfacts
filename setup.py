@@ -6,7 +6,10 @@ requires = [
         "shove",
         "flask",
         'requests',
-        'sqlalchemy']
+        'sqlalchemy',
+        'tw2.core',
+        'tw2.forms',
+        ]
 
 setup(
         name="catfacts",

@@ -15,7 +15,7 @@ class CatFactsREST(object):
         dburi = self.config['dburi']
         self.db = Shove(dburi)
         self.app = Flask(__name__)
-        self.twilio = TwilioRestClient(
+        self.api = TwilioRestClient(
                 self.config['SID'],
                 self.config['token'])
         if 'numbers' not in self.db:
@@ -26,25 +26,24 @@ class CatFactsREST(object):
         self.db.sync()
 
         self.routes = {
-                "/api/numbers": (self.add_number, {"methods": ['POST']}),
-                "/api/numbers/<num>": (self.remove_number, {"methods":
-                    ['DELETE']}),
-                "/api/callback": (self.twilio_callback, {"methods": ['GET']}),
-                "/api/facts": (self.add_facts, {"methods": ['POST']})}
+                "/api/numbers/<num>": (self.remove_number, {"methods": ['DELETE',]}),
+                "/numbers": (self.add_number, {"methods": ['POST',]}),
+                "/api/callback": (self.twilio_callback, {"methods": ['GET',]}),
+                "/api/facts": (self.add_facts, {"methods": ['POST',]})}
         map(
-                lambda route: self.app.route(
-                    route,
-                    **self.routes[route][1])(self.routes[route][0]),
-                self.routes)
-
+            lambda route: self.app.route(route,
+                **self.routes[route][1])(self.routes[route][0]),
+            self.routes)
 
     def add_number(self):
         """
         POST: /api/numbers
         """
+        print "Adding numbers"
         try:
-            data = json.loads(request.data)
-        except:
+            j = request.values['json']
+            data = json.loads(j)
+        except Exception as e:
             return json.dumps(dict(
                 success=False,
                 message="Invalid data recieved"))
@@ -60,16 +59,20 @@ class CatFactsREST(object):
             if number not in self.db['numbers']:
                 self.db['numbers'].append(number)
                 self.db.sync()
-                self.twilio.sms.messages.create(
+                self.api.sms.messages.create(
                 to=number,
-                body="Congrats, you have been signe dup for catfacts, the Premire cat information service, you will receive hourly cat information")
+                from_="2037947419",
+                body="Congrats, you have been signed up for catfacts, \
+                        the Premire cat information service, you will \
+                        receive hourly cat information")
                 return json.dumps(dict(
                     success=True,
                     message="Added {0} to catfacts".format(number)))
             else:
                 return json.dumps(dict(
                     success=False,
-                    message="{0} is already signe dup for catfacts".format(number)))
+                    message="{0} is already signed up for catfacts".format(
+                            number)))
 
         except KeyError:
             return json.dumps(dict(
@@ -104,7 +107,7 @@ class CatFactsREST(object):
         POST: /api/facts
         """
         try:
-            data = json.loads(request.body)
+            data = json.loads(request.values['json'])
         except:
             return json.dumps(dict(
                 success=False,
@@ -130,8 +133,10 @@ class CatFactsREST(object):
 
     def start(self):
         self.app.run(
+                debug=True,
                 host=self.config['host'],
                 port=self.config['port'])
+
 
 def load_facts(config):
     import requests
@@ -157,4 +162,3 @@ def main():
         load_facts(config)
     elif argv[1] == "cron":
         pass
-
