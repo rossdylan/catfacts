@@ -5,7 +5,8 @@ requires = [
         "pyyaml",
         "shove",
         "flask",
-        'requests',]
+        'requests',
+        'sqlalchemy']
 
 setup(
         name="catfacts",
@@ -13,6 +14,7 @@ setup(
         author="Ross Delinger",
         author_email="rdelinger@helixoide.com",
         install_requires=requires,
+        packages=['catfacts'],
         entry_points="""
         [console_scripts]
         catfacts = catfacts:main
