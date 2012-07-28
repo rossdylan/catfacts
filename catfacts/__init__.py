@@ -16,7 +16,7 @@ class CatFactsREST(object):
         self.db = Shove(dburi)
         self.app = Flask(__name__)
         self.twilio = TwilioRestClient(
-                self.config['sid'],
+                self.config['SID'],
                 self.config['token'])
         if 'numbers' not in self.db:
             self.db['numbers'] = []
@@ -138,14 +138,14 @@ def load_facts(config):
     import re
     db = Shove(config['dburi'])
     db['facts'] = []
-    url1 = 'http://www.cats.alpha.pl/facts.htm',
+    url1 = 'http://www.cats.alpha.pl/facts.htm'
     raw = requests.get(url1).text
     filtered = filter(
             lambda l: l.startswith('<li>'),
             map(lambda l: l.strip(), raw.split('\n')))
     stripped = map(lambda l: re.sub('<[^<]+?>', '', l), filtered)
     db['facts'].extend(stripped)
-    db.sync*()
+    db.sync()
 
 
 def main():
