@@ -2,15 +2,14 @@ import os
 from setuptools import setup
 
 requires = [
-        "twilio",
-        "pyyaml",
-        "shove",
-        "flask",
+        'twilio',
+        'pyyaml',
+        'shove',
+        'flask',
         'requests',
         'sqlalchemy',
-        'tw2.core',
-        'tw2.forms',
         'BeautifulSoup4',
+        'jinja2',
         ]
 
 if os.environ.get('OPENSHIFT_REPO_DIR'):
@@ -26,5 +25,6 @@ setup(
         entry_points="""
         [console_scripts]
         catfacts = catfacts:main
-        """
+        """,
+        zip_safe=False,
         )
