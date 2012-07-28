@@ -1,3 +1,5 @@
+import urllib
+import urllib2
 import yaml
 import json
 import twilio.twiml
@@ -37,6 +39,8 @@ class CatFactsREST(object):
                 "/api/callback": (self.twilio_callback, {"methods": ['GET']}),
                 "/api/facts": (self.add_facts, {"methods": ['POST']}),
                 "/": (self.view_home, {"methods": ['GET']}),
+                "/subscribe": (self.subscribe, {"methods": ['POST']}),
+                "/submit": (self.submit, {"methods": ['POST']}),
                 }
         map(
             lambda route: self.app.route(route,
@@ -48,6 +52,34 @@ class CatFactsREST(object):
         View the CatFacts homepage, where you can submit CatFacts!
         """
         return render_template('index.html')
+
+    def subscribe(self):
+        """
+        Add a phone number to the CatFacts database.
+        """
+        number = request.values['number']
+        data = json.dumps(dict(
+            number=number,
+            apikey='submitkey',
+        ))
+        payload = dict(json=data)
+        urllib2.urlopen('http://localhost:{0}/api/numbers'.format(
+            self.config['port'], data=urllib.urlencode(payload)))
+        self.app.redirect('/')  # TODO: Add success message
+
+    def submit(self):
+        """
+        Submit a cat fact to the CatFacts database.
+        """
+        fact = request.values['fact']
+        data = json.dumps(dict(
+            fact=fact,
+            apikey='submitkey',
+        ))
+        payload = dict(json=data)
+        urllib2.urlopen('http://localhost:{0}/api/facts'.format(
+            self.config['port'], data=urllib.urlencode(payload)))
+        self.app.redirect('/')  # TODO: Add success message
 
     def add_number(self):
         """
@@ -153,8 +185,8 @@ class CatFactsREST(object):
 
 
 def load_facts(config):
-    import requests
     import re
+    import requests
     db = Shove(config['dburi'])
     db['facts'] = []
     url1 = 'http://www.cats.alpha.pl/facts.htm'
