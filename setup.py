@@ -7,9 +7,8 @@ requires = [
         'flask',
         'requests',
         'sqlalchemy',
-        'tw2.core',
-        'tw2.forms',
         'pysqlite',
+        'jinja2',
         ]
 
 setup(

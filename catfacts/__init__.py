@@ -3,7 +3,12 @@ import json
 import twilio.twiml
 from twilio.rest import TwilioRestClient
 from shove import Shove
-from flask import Flask, request, abort
+from flask import (
+        Flask,
+        request,
+        abort,
+        render_template,
+        )
 from random import choice
 
 
@@ -30,12 +35,20 @@ class CatFactsREST(object):
                 "/api/numbers/<num>": (self.remove_number, {"methods":
                     ['DELETE']}),
                 "/api/callback": (self.twilio_callback, {"methods": ['GET']}),
-                "/api/facts": (self.add_facts, {"methods": ['POST']})}
+                "/api/facts": (self.add_facts, {"methods": ['POST']}),
+                "/": (self.view_home, {"methods": ['GET']}),
+                }
         map(
                 lambda route: self.app.route(
                     route,
                     **self.routes[route][1])(self.routes[route][0]),
                 self.routes)
+
+    def view_home(self):
+        """
+        View the CatFacts homepage, where you can submit CatFacts!
+        """
+        return render_template('index.html')
 
     def add_number(self):
         """
@@ -133,7 +146,8 @@ class CatFactsREST(object):
     def start(self):
         self.app.run(
                 host=self.config['host'],
-                port=self.config['port'])
+                port=self.config['port'],
+                debug=True)
 
 
 def load_facts(config):
