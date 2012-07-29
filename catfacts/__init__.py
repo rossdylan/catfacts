@@ -199,17 +199,16 @@ def create(globalArgs, **localArgs):
     return app.app
 
 def load_facts(config):
-    import re
     import requests
+    from bs4 import BeautifulSoup
     db = Shove(config['dburi'])
     db['facts'] = []
     url1 = 'http://www.cats.alpha.pl/facts.htm'
     raw = requests.get(url1).text
-    filtered = filter(
-            lambda l: l.startswith('<li>'),
-            map(lambda l: l.strip(), raw.split('\n')))
-    stripped = map(lambda l: re.sub('<[^<]+?>', '', l), filtered)
-    db['facts'].extend(stripped)
+    soup = BeautifulSoup(raw).findAll('ul')[1]
+    for string in soup.stripped_strings:
+        if string:
+            db['facts'].append(string)
     db.sync()
 
 
