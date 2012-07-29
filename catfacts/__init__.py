@@ -9,6 +9,7 @@ from flask import (
         Flask,
         request,
         abort,
+        redirect,
         render_template,
         )
 from random import choice
@@ -60,12 +61,16 @@ class CatFactsREST(object):
         number = request.values['number']
         data = json.dumps(dict(
             number=number,
-            apikey='submitkey',
+            apikey='key1',
         ))
         payload = dict(json=data)
-        urllib2.urlopen('http://localhost:{0}/api/numbers'.format(
-            self.config['port'], data=urllib.urlencode(payload)))
-        self.app.redirect('/')  # TODO: Add success message
+        print "calling api"
+        try:
+            print urllib2.urlopen('http://localhost:{0}/api/numbers'.format(
+                self.config['_port']), data=urllib.urlencode(payload)).readlines()
+        except Exception as e:
+            print e
+        return redirect('/')  # TODO: Add success message
 
     def submit(self):
         """
@@ -77,9 +82,10 @@ class CatFactsREST(object):
             apikey='submitkey',
         ))
         payload = dict(json=data)
-        urllib2.urlopen('http://localhost:{0}/api/facts'.format(
-            self.config['port'], data=urllib.urlencode(payload)))
-        self.app.redirect('/')  # TODO: Add success message
+        print "calling API"
+        print urllib2.urlopen('http://localhost:{0}/api/facts'.format(
+            self.config['_port'], data=urllib.urlencode(payload))).readlines()
+        return redirect('/')  # TODO: Add success message
 
     def add_number(self):
         """
@@ -102,15 +108,19 @@ class CatFactsREST(object):
                 message="Unauthorized"))
         try:
             number = data['number']
+            print number
             if number not in self.db['numbers']:
                 self.db['numbers'].append(number)
+                print "number added"
                 self.db.sync()
-                self.api.sms.messages.create(
-                to=number,
-                from_="2037947419",
-                body="Congrats, you have been signed up for catfacts, \
-                        the Premire cat information service, you will \
-                        receive hourly cat information")
+                try:
+                    print self.api.sms.messages.create(
+                        to=number,
+                        from_="2037947419",
+                        body="Congrats, you have been signed up for catfacts, the Premire cat information service, you will receive hourly cat information")
+                except Exception as e:
+                    print e
+                print "message sent"
                 return json.dumps(dict(
                     success=True,
                     message="Added {0} to catfacts".format(number)))
@@ -183,6 +193,10 @@ class CatFactsREST(object):
                 port=self.config['port'],
                 debug=True)
 
+def create(globalArgs, **localArgs):
+    app = CatFactsREST(globalArgs)
+    app.debug = True
+    return app.app
 
 def load_facts(config):
     import re

@@ -9,6 +9,7 @@ requires = [
         'sqlalchemy',
         'pysqlite',
         'jinja2',
+        'pastescript'
         ]
 
 setup(
@@ -21,6 +22,8 @@ setup(
         entry_points="""
         [console_scripts]
         catfacts = catfacts:main
+        [paste.app_factory]
+        main = catfacts:create
         """,
         zip_safe=False,
         )
