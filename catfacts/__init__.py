@@ -10,7 +10,6 @@ from flask import (
         request,
         abort,
         render_template,
-        url_for,
         )
 from random import choice
 
