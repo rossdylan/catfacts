@@ -2,26 +2,103 @@
 <html lang="en">
 	<head>
 		<meta charset="UTF-8">
+        <link href="charsheet.css"
+                rel="stylesheet" type="text/css" media="all">
+        <style>
+        /* Reset */
+        html {
+            margin: 0px;
+            padding: 0px;
+            height: 100%;
+        }
+
+        body {
+            font-family: "Helvetica", "sans";
+            background: #CCC;
+            height: 100%;
+        }
+
+        h1, h2, h3, h4, h5, h6 > form {
+            margin-top: -10px;
+        } 
+
+        #wrapper {
+            width: 400px;
+            margin-left: auto;
+            margin-right: auto;
+            padding: 20px;
+            background: #EEE;
+            box-shadow: 3px 3px 5px 6px #AAA;
+        }
+
+        #header {
+            /* Zippo! */
+        }
+
+        .ascii-cat {
+            margin-left: -45px;
+        }
+
+        .subtitle {
+            font-style: italic;
+            margin-top: -15px;
+            margin-bottom: 20px;
+        }
+
+        .form-area {
+            margin: 10px auto;
+            border: 2px solid #000;
+            padding: 10px;
+        }
+
+        </style>
 		<title>CatFacts</title>
 	</head>
 	<body>
-		<h1>CatFacts</h1>
-        <p>Welcome to CatFacts, your premiere cat fact service.</p>
+        <div id="wrapper">
+            <div id="header">
+                <div class="ascii-cat"><pre><h3>
+              .__....._             _.....__,
+                 .": o :':         ;': o :".
+                 `. `-' .'.       .'. `-' .'  
+                   `---'             `---' 
 
-        <h2>Subscribe</h2>
-        <p>Enter a phone number in the form below to subscribe to
-            hourly cat facts, courtesy of CatFacts.</p>
-        <form id="fact-form" action="/subscribe" method="POST">
-            # <input type="text" name="number" value="867-5309" />
-            <input type="submit" value="Subscribe" />
-        </form>
+         _...----...      ...   ...      ...----..._
+      .-'__..-""'----    `.  `"`  .'    ----'""-..__`-.
+     '.-'   _.--"""'       `-._.-'       '"""--._   `-.`
+     '  .-"'                  :                  `"-.  `
+       '   `.              _.'"'._              .'   `
+             `.       ,.-'"       "'-.,       .'
+               `.                           .'
+          jgs    `-._                   _.-'
+                     `"'--...___...--'"`
+                </h3></pre></div>
+                <h1>CatFacts</h1>
+                <div class="subtitle">
+                    Welcome to CatFacts, your premiere cat fact service.
+                </div>
+            </div>
 
-        <h2>Submit a CatFact</h2>
-        <p>Use the below form to submit a CatFact to our impressive
-            database! Keep it short but impressive (as cats often are).</p>
-        <form id="submit-from" action="/submit" method="POST">
-            <textarea name="fact" rows="4" cols="40"></textarea>
-            <input type="submit" value="Submit" />
-        </form>
+            <div class="form-area">
+                <h2>Subscribe</h2>
+                <p>Enter a phone number in the form below to subscribe to
+                    hourly cat facts, courtesy of CatFacts.</p>
+                <form action="/subscribe" method="POST">
+                    # <input type="text" name="number" value="5558675309" />
+                    <input type="submit" value="Subscribe" />
+                </form>
+            </div>
+
+            <div class="form-area">
+                <h2>Submit a CatFact</h2>
+                <p>Use the below form to submit a CatFact to our impressive
+                    database! Keep it short but impressive
+                    (as cats often are).</p>
+                <form action="/submit" method="POST">
+                    <textarea name="fact" rows="4" cols="40"></textarea>
+                    <input type="submit" value="Submit" />
+                </form>
+            </div>
+        </div>
 	</body>
 </html>
