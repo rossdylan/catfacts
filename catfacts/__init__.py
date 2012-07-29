@@ -109,6 +109,7 @@ class CatFactsREST(object):
         try:
             number = data['number']
             print number
+            print self.db['numbers']
             if number not in self.db['numbers']:
                 self.db['numbers'].append(number)
                 print "number added"
