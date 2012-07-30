@@ -24,7 +24,7 @@ class CatFactsREST(object):
         dburi = self.config['dburi']
 
         self.db = Shove(dburi)
-        self.db_lock = Lock()
+        self.dbLock = Lock()
         self.app = Flask(__name__)
         self.api = TwilioRestClient(
                 self.config['SID'],
