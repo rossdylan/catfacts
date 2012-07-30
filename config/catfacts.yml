@@ -1,6 +1,0 @@
-SID: default
-token: default
-host: 127.0.0.1
-port: 8091
-dburi: sqlite:///catfacts.db
-apikeys: submitkey
