@@ -28,16 +28,16 @@ class CatFactsREST(object):
                 self.config['token'])
         if 'numbers' not in self.db:
             self.db['numbers'] = []
-        if 'facts' not in self.db:
-            print "No catfacts found, run catfacts load"
-            exit()
+        f = file('catfacts.raw')
+        facts = f.read().split("\n")
+        self.db['fact'] = facts
         self.db.sync()
 
         self.routes = {
                 "/api/numbers": (self.add_number, {"methods": ['POST']}),
                 "/api/numbers/<num>": (self.remove_number, {"methods":
                     ['DELETE']}),
-                "/api/callback": (self.twilio_callback, {"methods": ['GET']}),
+                "/api/callback": (self.twilio_callback, {"methods": ['POST']}),
                 "/api/facts": (self.add_facts, {"methods": ['POST']}),
                 "/": (self.view_home, {"methods": ['GET']}),
                 "/subscribe": (self.subscribe, {"methods": ['POST']}),
@@ -84,7 +84,7 @@ class CatFactsREST(object):
         payload = dict(json=data)
         print "calling API"
         print urllib2.urlopen('http://localhost:{0}/api/facts'.format(
-            self.config['_port'], data=urllib.urlencode(payload))).readlines()
+            self.config['_port']), data=urllib.urlencode(payload)).readlines()
         return redirect('/')  # TODO: Add success message
 
     def add_number(self):
@@ -119,6 +119,10 @@ class CatFactsREST(object):
                         to=number,
                         from_="2037947419",
                         body="Congrats, you have been signed up for catfacts, the Premire cat information service, you will receive hourly cat information")
+                    print self.api.sms.messages.create(
+                            to=number,
+                            from_="2037947419",
+                            body=choice(self.db['facts']))
                 except Exception as e:
                     print e
                 print "message sent"
@@ -155,8 +159,10 @@ class CatFactsREST(object):
         """
         POST: /api/callback
         """
+        print "Calling wilio callback"
         response = twilio.twiml.Response()
         response.sms(choice(self.db['facts']))
+        print response
         return str(response)
 
     def add_facts(self):
