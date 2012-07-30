@@ -219,13 +219,40 @@ def load_facts(config):
     db.sync()
 
 
+def cron(config):
+    account_sid = config.get("app:main", "SID")
+    auth_token = config.get("app:main", "token")
+    client = TwilioRestClient(account_sid, auth_token)
+    db = Shove(config.get("app:main", "dburi"))
+    from_number = config.get("app:main", "from")
+    for number in db['numbers']:
+        while True:
+            fact = choice(db['facts'])
+            if len(fact) < 140:
+                try:
+                    client.sms.messages.create(
+                            to=number,
+                            from_=from_number,
+                            body=fact)
+                    print "Sent '{0}' to {1}".format(fact, number)
+                    break
+                except:
+                    print "Failed to send fact to {0}".format(number)
+
+def dump(config):
+    db = Shove(config.get("app:main", "dburi"))
+    import pprint
+    pprint.pprint(db['numbers'])
+    pprint.pprint(db['facts'])
+
 def main():
     from sys import argv
-    config = yaml.load(file(argv[2]).read())
-    if argv[1] == "rest":
-        cf = CatFactsREST(config)
-        cf.start()
-    elif argv[1] == "load":
+    from ConfigParser import ConfigParser
+    config = ConfigParser()
+    config.read(argv[2])
+    if argv[1] == "load":
         load_facts(config)
     elif argv[1] == "cron":
-        pass
+        cron(config)
+    elif argv[1] == "dump":
+        dump(config)
