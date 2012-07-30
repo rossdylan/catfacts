@@ -1,7 +1,7 @@
 import urllib
 import urllib2
-import yaml
 import json
+import re
 import twilio.twiml
 from twilio.rest import TwilioRestClient
 from shove import Shove
@@ -67,6 +67,13 @@ class CatFactsREST(object):
         Add a phone number to the CatFacts database.
         """
         number = request.values['number']
+        try:
+            for c in number:
+                int(c)
+        except:
+            print "Attempted to subscribe bad number {0}".format(number)
+            return redirect('/')
+
         data = json.dumps(dict(
             number=number,
             apikey='key1',
@@ -151,12 +158,14 @@ class CatFactsREST(object):
         DELETE: /api/numbers/<number>
         """
         if num in self.db:
+            print "Attempting to delete {0}".format(num)
             self.dbLock.acquire()
             temp_numbers = self.db['numbers']
             temp_numbers.remove(num)
             self.db['numbers'] = temp_numbers
             self.db.sync()
             self.dbLock.release()
+            print "Attempting to delete {0}".format(num)
             return json.dumps(dict(
                 success=True,
                 message="Removed {0} from catfacts".format(num)))
@@ -180,6 +189,7 @@ class CatFactsREST(object):
         """
         POST: /api/facts
         """
+
         try:
             data = json.loads(request.values['json'])
         except:
