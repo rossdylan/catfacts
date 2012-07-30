@@ -12,6 +12,7 @@ from flask import (
         redirect,
         render_template,
         )
+from threading import Lock
 from random import choice
 
 
@@ -21,18 +22,24 @@ class CatFactsREST(object):
         self.config = config
         self.apikeys = [s.strip() for s in self.config['apikeys'].split(',')]
         dburi = self.config['dburi']
+
         self.db = Shove(dburi)
+        self.db_lock = Lock()
         self.app = Flask(__name__)
         self.api = TwilioRestClient(
                 self.config['SID'],
                 self.config['token'])
+
         if 'numbers' not in self.db:
             print "creating numbers key"
             self.db['numbers'] = []
+
         f = file('catfacts.raw')
         facts = f.read().split("\n")
+        self.dbLock.acquire()
         self.db['facts'] = facts
         self.db.sync()
+        self.dbLock.release()
 
         self.routes = {
                 "/api/numbers": (self.add_number, {"methods": ['POST']}),
@@ -107,10 +114,12 @@ class CatFactsREST(object):
         try:
             number = data['number']
             if number not in self.db['numbers']:
+                self.dbLock.acquire()
                 temp_numbers = self.db['numbers']
                 temp_numbers.append(number)
                 self.db['numbers'] = temp_numbers
                 self.db.sync()
+                self.dbLock.release()
                 try:
                     self.api.sms.messages.create(
                         to=number,
@@ -142,8 +151,12 @@ class CatFactsREST(object):
         DELETE: /api/numbers/<number>
         """
         if num in self.db:
-            self.db['numbers'].remove(num)
+            self.dbLock.acquire()
+            temp_numbers = self.db['numbers']
+            temp_numbers.remove(num)
+            self.db['numbers'] = temp_numbers
             self.db.sync()
+            self.dbLock.release()
             return json.dumps(dict(
                 success=True,
                 message="Removed {0} from catfacts".format(num)))
@@ -151,7 +164,6 @@ class CatFactsREST(object):
             return json.dumps(dict(
                 success=False,
                 message="{0} is not signed up for catfacts".format(num)))
-        self.db.sync()
 
 
     def twilio_callback(self):
@@ -183,8 +195,12 @@ class CatFactsREST(object):
                 message="Unauthorized"))
 
         try:
-            self.db['facts'].extend(data['facts'])
+            self.dbLock.acquire()
+            temp_facts = self.db['facts']
+            temp_facts.extend(data['facts'])
+            self.db['facts'] = temp_facts
             self.db.sync()
+            self.dbLock.release()
             return json.dumps(dict(
                 success=True,
                 message='Added more cat facts'))
