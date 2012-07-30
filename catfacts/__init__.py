@@ -27,10 +27,11 @@ class CatFactsREST(object):
                 self.config['SID'],
                 self.config['token'])
         if 'numbers' not in self.db:
+            print "creating numbers key"
             self.db['numbers'] = []
         f = file('catfacts.raw')
         facts = f.read().split("\n")
-        self.db['fact'] = facts
+        self.db['facts'] = facts
         self.db.sync()
 
         self.routes = {
@@ -64,7 +65,6 @@ class CatFactsREST(object):
             apikey='key1',
         ))
         payload = dict(json=data)
-        print "calling api"
         try:
             print urllib2.urlopen('http://localhost:{0}/api/numbers'.format(
                 self.config['_port']), data=urllib.urlencode(payload)).readlines()
@@ -82,7 +82,6 @@ class CatFactsREST(object):
             apikey='submitkey',
         ))
         payload = dict(json=data)
-        print "calling API"
         print urllib2.urlopen('http://localhost:{0}/api/facts'.format(
             self.config['_port']), data=urllib.urlencode(payload)).readlines()
         return redirect('/')  # TODO: Add success message
@@ -91,7 +90,6 @@ class CatFactsREST(object):
         """
         POST: /api/numbers
         """
-        print "Adding numbers"
         try:
             j = request.values['json']
             data = json.loads(j)
@@ -108,24 +106,23 @@ class CatFactsREST(object):
                 message="Unauthorized"))
         try:
             number = data['number']
-            print number
-            print self.db['numbers']
             if number not in self.db['numbers']:
-                self.db['numbers'].append(number)
-                print "number added"
+                temp_numbers = self.db['numbers']
+                temp_numbers.append(number)
+                self.db['numbers'] = temp_numbers
                 self.db.sync()
                 try:
-                    print self.api.sms.messages.create(
+                    self.api.sms.messages.create(
                         to=number,
-                        from_="2037947419",
+                        from_=self.config['from'],
                         body="Congrats, you have been signed up for catfacts, the Premire cat information service, you will receive hourly cat information")
-                    print self.api.sms.messages.create(
+                    self.api.sms.messages.create(
                             to=number,
-                            from_="2037947419",
+                            from_=self.config['from'],
                             body=choice(self.db['facts']))
+                    print "{0} Was registered for catfacts".format(number)
                 except Exception as e:
                     print e
-                print "message sent"
                 return json.dumps(dict(
                     success=True,
                     message="Added {0} to catfacts".format(number)))
@@ -154,6 +151,8 @@ class CatFactsREST(object):
             return json.dumps(dict(
                 success=False,
                 message="{0} is not signed up for catfacts".format(num)))
+        self.db.sync()
+
 
     def twilio_callback(self):
         """
