@@ -263,6 +263,7 @@ def cron(config):
                     break
                 except:
                     print "Failed to send fact to {0}".format(number)
+                    break
 
 def dump(config):
     db = Shove(config.get("app:main", "dburi"))
