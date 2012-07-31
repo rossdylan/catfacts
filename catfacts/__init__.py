@@ -70,6 +70,8 @@ class CatFactsREST(object):
         try:
             for c in number:
                 int(c)
+            if len(number) > 10:
+                raise Exception
         except:
             print "Attempted to subscribe bad number {0}".format(number)
             return redirect('/')
@@ -138,7 +140,12 @@ class CatFactsREST(object):
                             body=choice(self.db['facts']))
                     print "{0} Was registered for catfacts".format(number)
                 except Exception as e:
-                    print e
+                    self.dbLock.acquire()
+                    temp_numbers = self.db['numbers']
+                    temp_numbers.remove(number)
+                    self.db['numbers'] = temp_numbers
+                    self.dbLock.release()
+                    print "bad number {0}, deleting from Database".format(number)
                 return json.dumps(dict(
                     success=True,
                     message="Added {0} to catfacts".format(number)))
