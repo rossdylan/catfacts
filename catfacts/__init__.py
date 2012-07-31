@@ -76,7 +76,7 @@ class CatFactsREST(object):
 
         data = json.dumps(dict(
             number=number,
-            apikey='key1',
+            apikey=self.config['localkey'],
         ))
         payload = dict(json=data)
         try:
@@ -93,7 +93,7 @@ class CatFactsREST(object):
         fact = request.values['fact']
         data = json.dumps(dict(
             fact=fact,
-            apikey='submitkey',
+            apikey=self.config['localkey'],
         ))
         payload = dict(json=data)
         print urllib2.urlopen('http://localhost:{0}/api/facts'.format(
@@ -269,7 +269,6 @@ def dump(config):
     db = Shove(config.get("app:main", "dburi"))
     import pprint
     pprint.pprint(db['numbers'])
-    pprint.pprint(db['facts'])
 
 def main():
     from sys import argv
