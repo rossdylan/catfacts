@@ -1,7 +1,7 @@
 CatFacts: The Best WebApp Ever Invented
 =======================================
 
-+ What is CatFacts?
+What is CatFacts?
   + You have all probably seen those memes floating around where someone gets
     pissed off at people texting them about cats.
   + Those memes are probably just people pranking others by hand
